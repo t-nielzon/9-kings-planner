@@ -6,11 +6,10 @@ import clsx from "clsx";
 
 interface KingdomGridProps {
   gridLayout: GridLayout;
-  onCardPlaced: (position: string, cardId: string) => void;
   onCardRemoved: (position: string) => void;
   onPlotUnlock: (position: string) => void;
   onExpandAll: () => void;
-  // Build plan management props
+  // build plan management props
   placedCardsCount: number;
   savedBuildPlansCount: number;
   onClearGrid: () => void;
@@ -30,7 +29,6 @@ interface GridPlotProps {
   onPlotUnlock: (position: string) => void;
 }
 
-// Individual grid plot component with drop zone
 function GridPlot({
   position,
   plotData,
@@ -57,7 +55,6 @@ function GridPlot({
     ? allCards.find((c) => c.id === plotData.cardId)
     : null;
 
-  // Get king-specific color for placed card
   const kingColor = card
     ? kingColors[card.kingId as keyof typeof kingColors] || "stone"
     : "nothing";
@@ -81,7 +78,6 @@ function GridPlot({
       )}
       onClick={handleClick}
     >
-      {/* Card preview if placed */}
       {card ? (
         <div className="w-full h-full flex flex-col items-center justify-center p-1">
           <div className="w-16 h-16 mb-1 overflow-hidden rounded border border-${kingColor}-300">
@@ -115,7 +111,6 @@ function GridPlot({
   );
 }
 
-// Card Tooltip Component
 interface CardTooltipProps {
   card: Card;
   isVisible: boolean;
@@ -141,7 +136,6 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
         className={`w-96 p-6 bg-${kingColor}-800/95 border-2 border-${kingColor}-400 rounded-lg shadow-2xl backdrop-blur-sm`}
       >
         <div className="flex gap-6">
-          {/* Large Card Image */}
           <div className="flex-shrink-0">
             <img
               src={card.assetPath}
@@ -153,7 +147,6 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
             />
           </div>
 
-          {/* Card Details */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-3">
               <h3 className={`text-xl font-bold text-${kingColor}-100`}>
@@ -172,7 +165,6 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
               {card.description}
             </p>
 
-            {/* King Badge */}
             <div
               className={`inline-block px-3 py-2 text-sm rounded-lg bg-${kingColor}-700/50 text-${kingColor}-300 border border-${kingColor}-500/50 font-medium`}
             >
@@ -201,7 +193,6 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
   );
 }
 
-// Draggable card component
 interface DraggableCardProps {
   card: Card;
   className?: string;
@@ -211,19 +202,16 @@ function DraggableCard({ card, className }: DraggableCardProps) {
   const [showTooltip, setShowTooltip] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: `card-${card.id}`,
-      data: {
-        type: "card",
-        card,
-      },
-    });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `card-${card.id}`,
+    data: {
+      type: "card",
+      card,
+    },
+  });
 
-  // Remove transform styling - DragOverlay handles this now
   const style = undefined;
 
-  // Get king-specific color from mapping
   const kingColor =
     kingColors[card.kingId as keyof typeof kingColors] || "stone";
 
@@ -250,7 +238,7 @@ function DraggableCard({ card, className }: DraggableCardProps) {
         className={clsx(
           "w-24 h-32 border-2 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 select-none",
           `border-${kingColor}-400 bg-${kingColor}-800/30 hover:bg-${kingColor}-700/40 shadow-lg hover:shadow-xl`,
-          isDragging && "opacity-30", // Just fade out the original, DragOverlay shows the moving version
+          isDragging && "opacity-30",
           className
         )}
         onMouseEnter={handleMouseEnter}
@@ -258,7 +246,6 @@ function DraggableCard({ card, className }: DraggableCardProps) {
         onMouseMove={handleMouseMove}
       >
         <div className="w-full h-full flex flex-col p-2">
-          {/* Card Image */}
           <div className="flex-1 mb-2 overflow-hidden rounded">
             <img
               src={card.assetPath}
@@ -271,7 +258,6 @@ function DraggableCard({ card, className }: DraggableCardProps) {
             />
           </div>
 
-          {/* Card Name */}
           <div
             className={`text-xs text-center font-bold text-${kingColor}-100 truncate leading-tight`}
           >
@@ -291,7 +277,6 @@ function DraggableCard({ card, className }: DraggableCardProps) {
 
 export default function KingdomGrid({
   gridLayout,
-  onCardPlaced,
   onCardRemoved,
   onPlotUnlock,
   onExpandAll,
@@ -302,7 +287,6 @@ export default function KingdomGrid({
   onShowLoadDialog,
   className,
 }: KingdomGridProps) {
-  // Generate grid positions based on current size
   const generateGridPositions = (size: number): string[] => {
     const positions: string[] = [];
     for (let row = 0; row < size; row++) {
@@ -315,29 +299,24 @@ export default function KingdomGrid({
 
   const gridPositions = generateGridPositions(gridLayout.currentSize);
 
-  // Filtering state
   const [selectedKing, setSelectedKing] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
 
-  // Filter cards based on selected filters
   const filteredCards = allCards.filter((card) => {
     const kingMatch = selectedKing === "all" || card.kingId === selectedKing;
     const typeMatch = selectedType === "all" || card.type === selectedType;
     return kingMatch && typeMatch;
   });
 
-  // Get unique kings and types for filter options
   const uniqueKings = Array.from(new Set(allCards.map((card) => card.kingId)));
   const uniqueTypes = Array.from(new Set(allCards.map((card) => card.type)));
 
-  // Check if there are any locked plots
   const hasLockedPlots = Object.values(gridLayout.plots).some(
     (plot) => !plot.unlocked
   );
 
   return (
     <div className={clsx("flex flex-col gap-8", className)}>
-      {/* Kingdom Grid - Now on top */}
       <div className="flex-1">
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-nothing-300">
@@ -349,7 +328,6 @@ export default function KingdomGrid({
           </p>
         </div>
 
-        {/* Grid Display */}
         <div className="bg-stone-800/30 rounded-lg border border-stone-600 p-8">
           <div
             className="grid gap-3 mx-auto"
@@ -369,7 +347,6 @@ export default function KingdomGrid({
             ))}
           </div>
 
-          {/* Grid status indicator with expand all option */}
           <div className="flex justify-center items-center gap-2 mt-6">
             <div className="bg-stone-900/80 px-4 py-2 rounded-lg border border-stone-600">
               <span className="text-nothing-300 text-sm font-bold">
@@ -389,7 +366,6 @@ export default function KingdomGrid({
             )}
           </div>
 
-          {/* Build Plan Action Buttons */}
           <div className="flex justify-center flex-wrap gap-4 mt-6">
             <button
               className="btn-primary bg-red-600 hover:bg-red-500 border-red-400"
@@ -418,16 +394,13 @@ export default function KingdomGrid({
         </div>
       </div>
 
-      {/* Available Cards Panel - Now below with full width */}
       <div className="w-full bg-stone-800/50 rounded-lg p-6 border border-stone-600">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-nothing-300">
             Available Cards
           </h3>
 
-          {/* Filtering Controls */}
           <div className="flex gap-4">
-            {/* King Filter */}
             <div className="flex items-center gap-2">
               <label className="text-sm text-stone-300 font-medium">
                 King:
@@ -462,7 +435,6 @@ export default function KingdomGrid({
               </select>
             </div>
 
-            {/* Type Filter */}
             <div className="flex items-center gap-2">
               <label className="text-sm text-stone-300 font-medium">
                 Type:
@@ -483,7 +455,6 @@ export default function KingdomGrid({
           </div>
         </div>
 
-        {/* Full width grid with more columns and no scrolling */}
         <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3">
           {filteredCards.map((card) => (
             <DraggableCard key={card.id} card={card} />

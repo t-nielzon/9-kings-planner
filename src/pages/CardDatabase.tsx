@@ -21,7 +21,6 @@ function CardDisplay({ card, className }: CardDisplayProps) {
   const [showImageHover, setShowImageHover] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Get king-specific color
   const kingColor =
     kingColors[card.kingId as keyof typeof kingColors] || "stone";
 
@@ -37,43 +36,33 @@ function CardDisplay({ card, className }: CardDisplayProps) {
     setMousePosition({ x: e.clientX, y: e.clientY });
   };
 
-  // Smart positioning to keep overlay within viewport
   const getOverlayPosition = () => {
-    const overlayWidth = 208; // 192px image + 16px padding
-    const overlayHeight = 240; // 192px image + text + padding
+    const overlayWidth = 208;
+    const overlayHeight = 240;
     const margin = 16;
 
-    // Default position: above and to the right of cursor
     let left = mousePosition.x + margin;
     let top = mousePosition.y - overlayHeight - margin;
 
-    // Get viewport dimensions
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    // Horizontal positioning
     if (left + overlayWidth > viewportWidth - margin) {
-      // Position to the left of cursor if it would go off right edge
       left = mousePosition.x - overlayWidth - margin;
     }
 
-    // Ensure it doesn't go off left edge
     if (left < margin) {
       left = margin;
     }
 
-    // Vertical positioning
     if (top < margin) {
-      // Position below cursor if it would go off top edge
       top = mousePosition.y + margin;
     }
 
-    // Ensure it doesn't go off bottom edge
     if (top + overlayHeight > viewportHeight - margin) {
       top = viewportHeight - overlayHeight - margin;
     }
 
-    // Final safety check - ensure minimum viable position
     left = Math.max(
       margin,
       Math.min(left, viewportWidth - overlayWidth - margin)
@@ -95,7 +84,6 @@ function CardDisplay({ card, className }: CardDisplayProps) {
         )}
       >
         <div className="flex items-start gap-4">
-          {/* Card Image */}
           <div className="flex-shrink-0">
             <img
               src={card.assetPath}
@@ -110,7 +98,6 @@ function CardDisplay({ card, className }: CardDisplayProps) {
             />
           </div>
 
-          {/* Card Details */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <h3
@@ -129,7 +116,6 @@ function CardDisplay({ card, className }: CardDisplayProps) {
               {card.description}
             </p>
 
-            {/* King Badge */}
             <div
               className={`inline-block px-2 py-1 text-xs rounded bg-${kingColor}-700/50 text-${kingColor}-300 mb-3 border border-${kingColor}-500/50`}
             >
@@ -155,7 +141,6 @@ function CardDisplay({ card, className }: CardDisplayProps) {
         </div>
       </div>
 
-      {/* Full Image Hover Overlay */}
       {showImageHover && (
         <div
           className="fixed z-50 pointer-events-none"
@@ -192,10 +177,8 @@ export default function CardDatabase() {
   const [selectedKing, setSelectedKing] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Using all cards from all kings
   const cardDatabase = allCards;
 
-  // filter cards based on selected type, king, and search term
   const filteredCards = cardDatabase.filter((card: Card) => {
     const matchesType = selectedType === "all" || card.type === selectedType;
     const matchesKing = selectedKing === "all" || card.kingId === selectedKing;
@@ -242,9 +225,7 @@ export default function CardDatabase() {
         </p>
       </div>
 
-      {/* Filters */}
       <div className="mb-8 space-y-4">
-        {/* Search */}
         <div>
           <input
             type="text"
@@ -255,7 +236,6 @@ export default function CardDatabase() {
           />
         </div>
 
-        {/* King Filter */}
         <div className="flex flex-wrap gap-2">
           {kings.map((kingId: string) => (
             <button
@@ -273,7 +253,6 @@ export default function CardDatabase() {
           ))}
         </div>
 
-        {/* Type Filter */}
         <div className="flex flex-wrap gap-2">
           {cardTypes.map((type: string) => (
             <button
@@ -292,7 +271,6 @@ export default function CardDatabase() {
         </div>
       </div>
 
-      {/* Results Summary */}
       <div className="mb-6">
         <p className="text-stone-400">
           Showing {filteredCards.length} of {cardDatabase.length} cards
@@ -303,7 +281,6 @@ export default function CardDatabase() {
         </p>
       </div>
 
-      {/* Cards Grid */}
       {filteredCards.length > 0 ? (
         <div className="space-y-4">
           {filteredCards.map((card: Card) => (
@@ -322,7 +299,6 @@ export default function CardDatabase() {
         </div>
       )}
 
-      {/* Stats Summary */}
       <div className="mt-12 bg-stone-800/30 p-6 rounded-lg border border-stone-600">
         <h3 className="text-xl font-bold text-nothing-300 mb-4">
           📊 Database Statistics

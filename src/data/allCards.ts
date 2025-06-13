@@ -1,6 +1,5 @@
 import { Card } from "@/types";
 
-// King of Nothing Cards
 export const kingOfNothingCards: Card[] = [
   {
     id: "nothing-castle",
@@ -78,7 +77,6 @@ export const kingOfNothingCards: Card[] = [
   },
 ];
 
-// King of Spells Cards
 export const kingOfSpellsCards: Card[] = [
   {
     id: "spells-citadel",
@@ -157,7 +155,6 @@ export const kingOfSpellsCards: Card[] = [
   },
 ];
 
-// King of Greed Cards
 export const kingOfGreedCards: Card[] = [
   {
     id: "greed-palace",
@@ -240,7 +237,6 @@ export const kingOfGreedCards: Card[] = [
   },
 ];
 
-// King of Blood Cards
 export const kingOfBloodCards: Card[] = [
   {
     id: "blood-pagoda",
@@ -319,7 +315,6 @@ export const kingOfBloodCards: Card[] = [
   },
 ];
 
-// King of Nature Cards
 export const kingOfNatureCards: Card[] = [
   {
     id: "nature-treant",
@@ -397,7 +392,6 @@ export const kingOfNatureCards: Card[] = [
   },
 ];
 
-// King of Stone Cards
 export const kingOfStoneCards: Card[] = [
   {
     id: "stone-stronghold",
@@ -478,7 +472,6 @@ export const kingOfStoneCards: Card[] = [
   },
 ];
 
-// King of Progress Cards
 export const kingOfProgressCards: Card[] = [
   {
     id: "progress-mothership",
@@ -561,7 +554,6 @@ export const kingOfProgressCards: Card[] = [
   },
 ];
 
-// Neutral Cards
 export const neutralCards: Card[] = [
   // {
   //   id: "neutral-razing",
@@ -591,7 +583,6 @@ export const neutralCards: Card[] = [
   },
 ];
 
-// Combine all cards
 export const allCards: Card[] = [
   ...kingOfNothingCards,
   ...kingOfSpellsCards,
@@ -603,7 +594,6 @@ export const allCards: Card[] = [
   ...neutralCards,
 ];
 
-// King color mapping for UI theming
 export const kingColors = {
   "king-of-nothing": "nothing",
   "king-of-spells": "spells",

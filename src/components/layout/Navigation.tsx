@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import clsx from "clsx";
 
@@ -27,7 +26,6 @@ export default function Navigation() {
     <nav className="bg-stone-900/90 backdrop-blur-lg border-b border-stone-700 sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link
             to="/"
             className="flex items-center gap-3 text-xl font-bold text-nothing-300 hover:text-nothing-200 transition-colors"
@@ -38,7 +36,6 @@ export default function Navigation() {
             <span className="hidden sm:block">9 Kings Planner</span>
           </Link>
 
-          {/* Navigation Links */}
           <div className="flex items-center gap-2">
             {navigationItems.map((item) => (
               <Link
@@ -57,7 +54,6 @@ export default function Navigation() {
             ))}
           </div>
 
-          {/* Future: User Profile / Settings */}
           <div className="flex items-center gap-2">
             <div className="text-stone-400 text-sm hidden md:block">
               Alpha v0.1

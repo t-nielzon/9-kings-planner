@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -7,10 +7,9 @@ import {
 } from "@dnd-kit/core";
 import KingdomGrid from "@/components/KingdomGrid";
 import { GridLayout, Card } from "@/types";
-import { allCards, kingColors } from "@/data/allCards";
+import { kingColors } from "@/data/allCards";
 import clsx from "clsx";
 
-// Simple saved build plan interface for localStorage
 interface SavedBuildPlan {
   id: string;
   name: string;
@@ -18,7 +17,6 @@ interface SavedBuildPlan {
   created: Date;
 }
 
-// Drag Overlay Card Component
 function DragOverlayCard({ card }: { card: Card }) {
   const kingColor =
     kingColors[card.kingId as keyof typeof kingColors] || "stone";
@@ -31,7 +29,6 @@ function DragOverlayCard({ card }: { card: Card }) {
       )}
     >
       <div className="w-full h-full flex flex-col p-2">
-        {/* Card Image */}
         <div className="flex-1 mb-2 overflow-hidden rounded">
           <img
             src={card.assetPath}
@@ -44,7 +41,6 @@ function DragOverlayCard({ card }: { card: Card }) {
           />
         </div>
 
-        {/* Card Name */}
         <div
           className={`text-xs text-center font-bold text-${kingColor}-100 truncate leading-tight`}
         >
@@ -67,15 +63,13 @@ export default function GridPlanner() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
 
-  // Initial 3x3 grid with center plot unlocked (for castle) but show 5x5 grid
   const [gridLayout, setGridLayout] = useState<GridLayout>(() => {
     const initialGrid: GridLayout = {
-      currentSize: 5, // Always show 5x5 grid
+      currentSize: 5,
       unlockedPlots: [],
       plots: {},
     };
 
-    // Create all 5x5 plots but only unlock the initial 3x3
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 5; col++) {
         const position = `${row},${col}`;
@@ -92,7 +86,7 @@ export default function GridPlanner() {
           initialGrid.plots[position] = {
             level: 1,
             unlocked: false,
-            unlockedYear: 27, // Can be unlocked during tower event
+            unlockedYear: 27,
           };
         }
       }
@@ -100,19 +94,6 @@ export default function GridPlanner() {
 
     return initialGrid;
   });
-
-  const handleCardPlaced = (position: string, cardId: string) => {
-    setGridLayout((prev) => ({
-      ...prev,
-      plots: {
-        ...prev.plots,
-        [position]: {
-          ...prev.plots[position],
-          cardId,
-        },
-      },
-    }));
-  };
 
   const handleCardRemoved = (position: string) => {
     setGridLayout((prev) => ({
@@ -153,7 +134,6 @@ export default function GridPlanner() {
       const newUnlockedPlots = [...prev.unlockedPlots];
       const newPlots = { ...prev.plots };
 
-      // Unlock all currently locked plots
       Object.entries(prev.plots).forEach(([position, plot]) => {
         if (!plot.unlocked) {
           newUnlockedPlots.push(position);
@@ -182,7 +162,7 @@ export default function GridPlanner() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    setActiveCard(null); // Clear active card
+    setActiveCard(null);
 
     if (
       over &&
@@ -192,10 +172,18 @@ export default function GridPlanner() {
       const card = active.data.current.card;
       const position = over.data.current.position;
 
-      // check if plot is unlocked
       const plotData = gridLayout.plots[position];
       if (plotData?.unlocked) {
-        handleCardPlaced(position, card.id);
+        setGridLayout((prev) => ({
+          ...prev,
+          plots: {
+            ...prev.plots,
+            [position]: {
+              ...prev.plots[position],
+              cardId: card.id,
+            },
+          },
+        }));
       }
     }
   };
@@ -261,7 +249,6 @@ export default function GridPlanner() {
                 Kingdom Grid Planner
               </h1>
 
-              {/* Simplified Grid Stats */}
               <div className="flex flex-wrap gap-4">
                 <div className="bg-stone-800/30 px-4 py-2 rounded-lg border border-stone-600">
                   <span className="text-nothing-300 font-bold">
@@ -280,7 +267,6 @@ export default function GridPlanner() {
               </div>
             </div>
 
-            {/* Instructions moved to top right */}
             <div className="bg-blue-800/20 border border-blue-600/50 rounded-lg p-4 max-w-md lg:max-w-lg">
               <h4 className="font-bold text-blue-300 mb-2">How to use:</h4>
               <ul className="text-sm text-blue-200 space-y-1">
@@ -309,7 +295,6 @@ export default function GridPlanner() {
 
         <KingdomGrid
           gridLayout={gridLayout}
-          onCardPlaced={handleCardPlaced}
           onCardRemoved={handleCardRemoved}
           onPlotUnlock={handlePlotUnlock}
           onExpandAll={handleExpandAll}
@@ -356,7 +341,6 @@ export default function GridPlanner() {
           </div>
         )}
 
-        {/* Load Dialog */}
         {showLoadDialog && (
           <div className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-3">
@@ -424,7 +408,6 @@ export default function GridPlanner() {
         )}
       </div>
 
-      {/* Global Drag Overlay */}
       <DragOverlay>
         {activeCard ? <DragOverlayCard card={activeCard} /> : null}
       </DragOverlay>

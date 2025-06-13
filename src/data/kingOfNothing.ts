@@ -4,7 +4,7 @@ export const kingOfNothingCards: Card[] = [
   {
     id: "nothing-castle",
     name: "Castle",
-    type: "Castle",
+    type: "Base",
     description:
       "Base card. Its active skill makes the player shoot boulders that cause fixed AoE damage to enemies.",
     kingId: "king-of-nothing",
@@ -205,8 +205,8 @@ export const kingOfNothing: King = {
   description:
     "The King of Nothing is an all-around balanced king with a straightforward set of cards. It is considered the best deck for newcomers due to its simple mechanics and lack of reliance on specialized strategies. While it lacks standout combos or power spikes, it makes up for it with consistency and versatility.",
   cardPool: kingOfNothingCards,
-  uniqueDecrees: [], // King of Nothing has no unique decrees
-  perkTree: [], // Will be populated with universal perks only
+  uniqueDecrees: [],
+  perkTree: [],
   assets: {
     portrait: "/assets/king-of-nothing-king.jpg",
     cards: {

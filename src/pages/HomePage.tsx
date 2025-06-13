@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 export default function HomePage() {
@@ -12,7 +11,6 @@ export default function HomePage() {
         strategic depth of 9 Kings with all cards from all kings available
       </p>
 
-      {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
         <Link
           to="/planner"
@@ -43,13 +41,11 @@ export default function HomePage() {
         </Link>
       </div>
 
-      {/* The 9 Kings with images */}
       <div className="mb-16">
         <h2 className="text-3xl font-bold text-nothing-300 mb-8">
           The 9 Kings
         </h2>
         <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-          {/* Available Kings */}
           <div className="bg-nothing-800/30 p-4 rounded-lg border border-nothing-600 group">
             <div className="w-16 h-16 mx-auto mb-3 rounded-lg overflow-hidden bg-nothing-700/50">
               <img
@@ -148,7 +144,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Coming Soon Kings */}
           <div className="bg-stone-800/30 p-4 rounded-lg border-2 border-dashed border-stone-500 group opacity-60">
             <div className="w-16 h-16 mx-auto mb-3 rounded-lg bg-stone-700/30 flex items-center justify-center">
               <div className="text-2xl text-stone-400">❓</div>
@@ -165,7 +160,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Acknowledgements Section */}
       <div className="mt-16 pt-8 border-t border-stone-700">
         <h2 className="text-2xl font-bold text-nothing-300 mb-6">
           Acknowledgements

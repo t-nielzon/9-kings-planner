@@ -4,7 +4,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 9 Kings game-inspired color palette
         nothing: {
           50: "#f8f7f4",
           100: "#e8e5dc",
@@ -91,10 +90,10 @@ export default {
         },
       },
       fontFamily: {
-        pixel: ["Courier New", "monospace"], // placeholder for pixel font
+        pixel: ["Courier New", "monospace"],
       },
       width: {
-        108: "27rem", // Custom width for wider cards panel
+        108: "27rem",
       },
       animation: {
         "card-hover": "card-hover 0.2s ease-in-out",
@@ -117,7 +116,6 @@ export default {
     },
   },
   plugins: [
-    // Custom scrollbar plugin
     function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-thin": {

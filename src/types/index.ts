@@ -21,6 +21,8 @@ export interface Card {
   description: string;
   kingId: string;
   assetPath: string;
+  stats?: CardStats;
+  effects?: CardEffect[];
 }
 
 export interface CardStats {
