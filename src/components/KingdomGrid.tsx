@@ -63,7 +63,7 @@ function GridPlot({
     <div
       ref={setNodeRef}
       className={clsx(
-        "w-24 h-24 border-2 rounded-lg transition-all duration-200 flex flex-col items-center justify-center relative",
+        "w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 border-2 rounded-lg transition-all duration-200 flex flex-col items-center justify-center relative",
         plotData?.unlocked
           ? card
             ? `border-${kingColor}-400 bg-${kingColor}-800/50 hover:bg-${kingColor}-700/50 cursor-pointer`
@@ -77,10 +77,11 @@ function GridPlot({
           "border-yellow-400 bg-yellow-400/10 ring-1 ring-yellow-400/50"
       )}
       onClick={handleClick}
+      style={{ touchAction: "manipulation" }}
     >
       {card ? (
-        <div className="w-full h-full flex flex-col items-center justify-center p-1">
-          <div className="w-16 h-16 mb-1 overflow-hidden rounded border border-${kingColor}-300">
+        <div className="w-full h-full flex flex-col items-center justify-center p-0.5 sm:p-1">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mb-0.5 sm:mb-1 overflow-hidden rounded border border-${kingColor}-300">
             <img
               src={card.assetPath}
               alt={card.name}
@@ -91,7 +92,7 @@ function GridPlot({
             />
           </div>
           <div
-            className={`text-xs text-${kingColor}-200 text-center truncate w-full leading-tight`}
+            className={`text-xs text-${kingColor}-200 text-center truncate w-full leading-tight hidden sm:block`}
           >
             {card.name}
           </div>
@@ -99,12 +100,12 @@ function GridPlot({
       ) : plotData?.unlocked ? (
         <div className="text-stone-400 text-xs text-center">
           <div className="mb-1">Empty</div>
-          <div className="text-stone-500">{position}</div>
+          <div className="text-stone-500 hidden sm:block">{position}</div>
         </div>
       ) : (
         <div className="text-stone-500 text-xs text-center">
           <div className="text-lg mb-1">+</div>
-          <div className="text-stone-600">Expand</div>
+          <div className="text-stone-600 hidden sm:block">Expand</div>
         </div>
       )}
     </div>
@@ -127,20 +128,21 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
     <div
       className="fixed z-50 pointer-events-none"
       style={{
-        left: position.x + 10,
-        top: position.y - 10,
-        transform: "translateY(-100%)",
+        left: Math.min(position.x + 10, window.innerWidth - 400),
+        top: Math.max(position.y - 10, 10),
+        transform:
+          position.y > window.innerHeight / 2 ? "translateY(-100%)" : "none",
       }}
     >
       <div
-        className={`max-w-2xl p-6 bg-${kingColor}-800/95 border-2 border-${kingColor}-400 rounded-lg shadow-2xl backdrop-blur-sm`}
+        className={`max-w-xs sm:max-w-2xl p-3 sm:p-6 bg-${kingColor}-800/95 border-2 border-${kingColor}-400 rounded-lg shadow-2xl backdrop-blur-sm`}
       >
-        <div className="flex gap-6">
-          <div className="flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+          <div className="flex-shrink-0 self-center">
             <img
               src={card.assetPath}
               alt={card.name}
-              className={`max-w-xs max-h-96 w-auto h-auto object-contain rounded-lg border-2 border-${kingColor}-400`}
+              className={`max-w-24 max-h-32 sm:max-w-xs sm:max-h-96 w-auto h-auto object-contain rounded-lg border-2 border-${kingColor}-400`}
               onError={(e) => {
                 e.currentTarget.src = "/assets/placeholder-card.jpg";
               }}
@@ -148,25 +150,27 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-3">
-              <h3 className={`text-xl font-bold text-${kingColor}-100`}>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <h3
+                className={`text-lg sm:text-xl font-bold text-${kingColor}-100`}
+              >
                 {card.name}
               </h3>
               <span
-                className={`px-3 py-1 text-sm rounded-lg border border-${kingColor}-400 bg-${kingColor}-700/50 text-${kingColor}-200 font-medium`}
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-lg border border-${kingColor}-400 bg-${kingColor}-700/50 text-${kingColor}-200 font-medium self-start`}
               >
                 {card.type}
               </span>
             </div>
 
             <p
-              className={`text-base text-${kingColor}-200 mb-4 leading-relaxed`}
+              className={`text-sm sm:text-base text-${kingColor}-200 mb-4 leading-relaxed`}
             >
               {card.description}
             </p>
 
             <div
-              className={`inline-block px-3 py-2 text-sm rounded-lg bg-${kingColor}-700/50 text-${kingColor}-300 border border-${kingColor}-500/50 font-medium`}
+              className={`inline-block px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded-lg bg-${kingColor}-700/50 text-${kingColor}-300 border border-${kingColor}-500/50 font-medium`}
             >
               {card.kingId === "neutral"
                 ? "⚪ Neutral"
@@ -210,8 +214,6 @@ function DraggableCard({ card, className }: DraggableCardProps) {
     },
   });
 
-  const style = undefined;
-
   const kingColor =
     kingColors[card.kingId as keyof typeof kingColors] || "stone";
 
@@ -232,11 +234,11 @@ function DraggableCard({ card, className }: DraggableCardProps) {
     <>
       <div
         ref={setNodeRef}
-        style={style}
+        style={{ touchAction: "none" }}
         {...listeners}
         {...attributes}
         className={clsx(
-          "w-24 h-32 border-2 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 select-none",
+          "w-16 h-20 sm:w-20 sm:h-24 md:w-24 md:h-32 border-2 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 select-none",
           `border-${kingColor}-400 bg-${kingColor}-800/30 hover:bg-${kingColor}-700/40 shadow-lg hover:shadow-xl`,
           isDragging && "opacity-30",
           className
@@ -245,8 +247,8 @@ function DraggableCard({ card, className }: DraggableCardProps) {
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
       >
-        <div className="w-full h-full flex flex-col p-2">
-          <div className="flex-1 mb-2 overflow-hidden rounded">
+        <div className="w-full h-full flex flex-col p-1 sm:p-2">
+          <div className="flex-1 mb-1 sm:mb-2 overflow-hidden rounded">
             <img
               src={card.assetPath}
               alt={card.name}
@@ -316,21 +318,21 @@ export default function KingdomGrid({
   );
 
   return (
-    <div className={clsx("flex flex-col gap-8", className)}>
+    <div className={clsx("flex flex-col gap-6 sm:gap-8", className)}>
       <div className="flex-1">
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-nothing-300">
+          <h2 className="text-xl sm:text-2xl font-bold text-nothing-300">
             Kingdom Layout
           </h2>
-          <p className="text-nothing-500">
+          <p className="text-nothing-500 text-sm sm:text-base">
             Drag cards onto unlocked plots or click dotted plots to expand your
             kingdom
           </p>
         </div>
 
-        <div className="bg-stone-800/30 rounded-lg border border-stone-600 p-8">
+        <div className="bg-stone-800/30 rounded-lg border border-stone-600 p-4 sm:p-8">
           <div
-            className="grid gap-3 mx-auto"
+            className="grid gap-2 sm:gap-3 mx-auto"
             style={{
               gridTemplateColumns: `repeat(${gridLayout.currentSize}, 1fr)`,
               width: "fit-content",
@@ -347,18 +349,20 @@ export default function KingdomGrid({
             ))}
           </div>
 
-          <div className="flex justify-center items-center gap-2 mt-6">
-            <div className="bg-stone-900/80 px-4 py-2 rounded-lg border border-stone-600">
-              <span className="text-nothing-300 text-sm font-bold">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4 sm:mt-6">
+            <div className="bg-stone-900/80 px-3 sm:px-4 py-2 rounded-lg border border-stone-600">
+              <span className="text-nothing-300 text-xs sm:text-sm font-bold">
                 Click on dotted plots to expand
               </span>
             </div>
             {hasLockedPlots && (
               <>
-                <span className="text-stone-500 text-sm">or</span>
+                <span className="text-stone-500 text-xs sm:text-sm hidden sm:inline">
+                  or
+                </span>
                 <button
                   onClick={onExpandAll}
-                  className="bg-nothing-600 hover:bg-nothing-500 text-white px-3 py-2 rounded-lg border border-nothing-400 text-sm font-bold transition-colors duration-200"
+                  className="bg-nothing-600 hover:bg-nothing-500 text-white px-3 py-2 rounded-lg border border-nothing-400 text-xs sm:text-sm font-bold transition-colors duration-200"
                 >
                   Expand All Plots
                 </button>
@@ -366,9 +370,9 @@ export default function KingdomGrid({
             )}
           </div>
 
-          <div className="flex justify-center flex-wrap gap-4 mt-6">
+          <div className="flex justify-center flex-wrap gap-2 sm:gap-4 mt-4 sm:mt-6">
             <button
-              className="btn-primary bg-red-600 hover:bg-red-500 border-red-400"
+              className="btn-primary bg-red-600 hover:bg-red-500 border-red-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
               onClick={onClearGrid}
               disabled={placedCardsCount === 0}
             >
@@ -376,7 +380,7 @@ export default function KingdomGrid({
             </button>
 
             <button
-              className="btn-primary bg-green-600 hover:bg-green-500 border-green-400"
+              className="btn-primary bg-green-600 hover:bg-green-500 border-green-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
               onClick={onShowSaveDialog}
               disabled={placedCardsCount === 0}
             >
@@ -384,7 +388,7 @@ export default function KingdomGrid({
             </button>
 
             <button
-              className="btn-primary bg-blue-600 hover:bg-blue-500 border-blue-400"
+              className="btn-primary bg-blue-600 hover:bg-blue-500 border-blue-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
               onClick={onShowLoadDialog}
               disabled={savedBuildPlansCount === 0}
             >
@@ -394,21 +398,21 @@ export default function KingdomGrid({
         </div>
       </div>
 
-      <div className="w-full bg-stone-800/50 rounded-lg p-6 border border-stone-600">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-nothing-300">
+      <div className="w-full bg-stone-800/50 rounded-lg p-4 sm:p-6 border border-stone-600">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <h3 className="text-lg sm:text-xl font-bold text-nothing-300">
             Available Cards
           </h3>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
-              <label className="text-sm text-stone-300 font-medium">
+              <label className="text-xs sm:text-sm text-stone-300 font-medium">
                 King:
               </label>
               <select
                 value={selectedKing}
                 onChange={(e) => setSelectedKing(e.target.value)}
-                className="bg-stone-700 border border-stone-600 rounded px-3 py-1 text-sm text-stone-200 focus:border-nothing-400 focus:outline-none"
+                className="bg-stone-700 border border-stone-600 rounded px-2 sm:px-3 py-1 text-xs sm:text-sm text-stone-200 focus:border-nothing-400 focus:outline-none flex-1 sm:flex-none"
               >
                 <option value="all">All Kings</option>
                 {uniqueKings.map((king) => (
@@ -436,13 +440,13 @@ export default function KingdomGrid({
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm text-stone-300 font-medium">
+              <label className="text-xs sm:text-sm text-stone-300 font-medium">
                 Type:
               </label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="bg-stone-700 border border-stone-600 rounded px-3 py-1 text-sm text-stone-200 focus:border-nothing-400 focus:outline-none"
+                className="bg-stone-700 border border-stone-600 rounded px-2 sm:px-3 py-1 text-xs sm:text-sm text-stone-200 focus:border-nothing-400 focus:outline-none flex-1 sm:flex-none"
               >
                 <option value="all">All Types</option>
                 {uniqueTypes.map((type) => (
@@ -455,12 +459,12 @@ export default function KingdomGrid({
           </div>
         </div>
 
-        <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-2 sm:gap-3">
           {filteredCards.map((card) => (
             <DraggableCard key={card.id} card={card} />
           ))}
         </div>
-        <div className="mt-4 text-sm text-stone-400">
+        <div className="mt-4 text-xs sm:text-sm text-stone-400">
           {filteredCards.length} of {allCards.length} cards shown
         </div>
       </div>

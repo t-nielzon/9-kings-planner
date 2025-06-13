@@ -4,6 +4,10 @@ import {
   DragEndEvent,
   DragStartEvent,
   DragOverlay,
+  TouchSensor,
+  MouseSensor,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import KingdomGrid from "@/components/KingdomGrid";
 import { GridLayout, Card } from "@/types";
@@ -24,12 +28,13 @@ function DragOverlayCard({ card }: { card: Card }) {
   return (
     <div
       className={clsx(
-        "w-24 h-32 border-2 rounded-lg shadow-2xl rotate-3 scale-105 opacity-90",
+        "w-16 h-20 sm:w-20 sm:h-24 md:w-24 md:h-32 border-2 rounded-lg shadow-2xl rotate-3 scale-105 opacity-90",
         `border-${kingColor}-400 bg-${kingColor}-800/30`
       )}
+      style={{ touchAction: "none" }}
     >
-      <div className="w-full h-full flex flex-col p-2">
-        <div className="flex-1 mb-2 overflow-hidden rounded">
+      <div className="w-full h-full flex flex-col p-1 sm:p-2">
+        <div className="flex-1 mb-1 sm:mb-2 overflow-hidden rounded">
           <img
             src={card.assetPath}
             alt={card.name}
@@ -62,6 +67,16 @@ export default function GridPlanner() {
   );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
+
+  const mouseSensor = useSensor(MouseSensor);
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250,
+      tolerance: 5,
+    },
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   const [gridLayout, setGridLayout] = useState<GridLayout>(() => {
     const initialGrid: GridLayout = {
@@ -240,38 +255,49 @@ export default function GridPlanner() {
   const totalUnlockedPlots = gridLayout.unlockedPlots.length;
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="max-w-full mx-auto px-4">
-        <div className="mb-6">
-          <div className="flex justify-between items-start gap-8 mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-nothing-300 mb-4">
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      sensors={sensors}
+    >
+      <div className="max-w-full mx-auto px-2 sm:px-4">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 lg:gap-8 mb-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-nothing-300 mb-4">
                 Kingdom Grid Planner
               </h1>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="bg-stone-800/30 px-4 py-2 rounded-lg border border-stone-600">
-                  <span className="text-nothing-300 font-bold">
+              <div className="flex flex-wrap gap-2 sm:gap-4">
+                <div className="bg-stone-800/30 px-3 sm:px-4 py-2 rounded-lg border border-stone-600">
+                  <span className="text-nothing-300 font-bold text-sm sm:text-base">
                     Unlocked Plots:{" "}
                   </span>
-                  <span className="text-stone-300">{totalUnlockedPlots}</span>
+                  <span className="text-stone-300 text-sm sm:text-base">
+                    {totalUnlockedPlots}
+                  </span>
                 </div>
-                <div className="bg-stone-800/30 px-4 py-2 rounded-lg border border-stone-600">
-                  <span className="text-nothing-300 font-bold">
+                <div className="bg-stone-800/30 px-3 sm:px-4 py-2 rounded-lg border border-stone-600">
+                  <span className="text-nothing-300 font-bold text-sm sm:text-base">
                     Cards Placed:{" "}
                   </span>
-                  <span className="text-stone-300">
+                  <span className="text-stone-300 text-sm sm:text-base">
                     {placedCardsCount}/{totalUnlockedPlots}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-800/20 border border-blue-600/50 rounded-lg p-4 max-w-md lg:max-w-lg">
-              <h4 className="font-bold text-blue-300 mb-2">How to use:</h4>
-              <ul className="text-sm text-blue-200 space-y-1">
+            <div className="bg-blue-800/20 border border-blue-600/50 rounded-lg p-3 sm:p-4 w-full lg:max-w-md xl:max-w-lg">
+              <h4 className="font-bold text-blue-300 mb-2 text-sm sm:text-base">
+                How to use:
+              </h4>
+              <ul className="text-xs sm:text-sm text-blue-200 space-y-1">
                 <li>
                   • <strong>Drag</strong> cards from below onto unlocked plots
+                </li>
+                <li className="sm:hidden">
+                  • <strong>Long press</strong> cards to drag on mobile
                 </li>
                 <li>
                   • <strong>Click</strong> on placed cards to remove them
@@ -280,13 +306,13 @@ export default function GridPlanner() {
                   • <strong>Click</strong> on dotted plots to unlock and expand
                   your kingdom
                 </li>
-                <li>
+                <li className="hidden sm:block">
                   • <strong>Hover</strong> over cards to see detailed
                   information
                 </li>
                 <li>
                   • <strong>Filter</strong> cards by king or type using the
-                  dropdowns above
+                  dropdowns below
                 </li>
               </ul>
             </div>
