@@ -172,7 +172,7 @@ export default function HomePage() {
                 9 Kings Game Developer:
               </strong>{" "}
               <a
-                href="https://sadsocket.cm"
+                href="https://sadsocket.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-spells-300 hover:text-spells-200 transition-colors underline"

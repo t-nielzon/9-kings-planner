@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -67,6 +67,35 @@ export default function GridPlanner() {
   );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
+
+  // refs for dialog scroll behavior
+  const saveDialogRef = useRef<HTMLDivElement>(null);
+  const loadDialogRef = useRef<HTMLDivElement>(null);
+
+  // scroll to dialog when opened
+  useEffect(() => {
+    if (showSaveDialog && saveDialogRef.current) {
+      // small delay to ensure the dialog is rendered
+      setTimeout(() => {
+        saveDialogRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  }, [showSaveDialog]);
+
+  useEffect(() => {
+    if (showLoadDialog && loadDialogRef.current) {
+      // small delay to ensure the dialog is rendered
+      setTimeout(() => {
+        loadDialogRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  }, [showLoadDialog]);
 
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor, {
@@ -334,7 +363,10 @@ export default function GridPlanner() {
 
         {/* Save Dialog */}
         {showSaveDialog && (
-          <div className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4">
+          <div
+            ref={saveDialogRef}
+            className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
+          >
             <h4 className="text-lg font-bold text-nothing-300 mb-3">
               Save Build Plan
             </h4>
@@ -368,7 +400,10 @@ export default function GridPlanner() {
         )}
 
         {showLoadDialog && (
-          <div className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4">
+          <div
+            ref={loadDialogRef}
+            className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
+          >
             <div className="flex justify-between items-center mb-3">
               <h4 className="text-lg font-bold text-nothing-300">
                 Load Build Plan
