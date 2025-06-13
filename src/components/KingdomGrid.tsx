@@ -15,8 +15,9 @@ interface KingdomGridProps {
   onClearGrid: () => void;
   onShowSaveDialog: () => void;
   onShowLoadDialog: () => void;
-  // clipboard functionality props
   onCopyToClipboard: () => void;
+  onSaveAttemptEmpty: () => void;
+  onCopyAttemptEmpty: () => void;
   className?: string;
 }
 
@@ -290,6 +291,8 @@ export default function KingdomGrid({
   onShowSaveDialog,
   onShowLoadDialog,
   onCopyToClipboard,
+  onSaveAttemptEmpty,
+  onCopyAttemptEmpty,
   className,
 }: KingdomGridProps) {
   const generateGridPositions = (size: number): string[] => {
@@ -386,8 +389,9 @@ export default function KingdomGrid({
 
             <button
               className="btn-primary bg-green-600 hover:bg-green-500 border-green-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
-              onClick={onShowSaveDialog}
-              disabled={placedCardsCount === 0}
+              onClick={
+                placedCardsCount === 0 ? onSaveAttemptEmpty : onShowSaveDialog
+              }
             >
               💾 Save Build Plan
             </button>
@@ -402,8 +406,9 @@ export default function KingdomGrid({
 
             <button
               className="btn-primary bg-purple-600 hover:bg-purple-500 border-purple-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
-              onClick={onCopyToClipboard}
-              disabled={placedCardsCount === 0}
+              onClick={
+                placedCardsCount === 0 ? onCopyAttemptEmpty : onCopyToClipboard
+              }
               title="Copy shareable link to clipboard"
             >
               🔗 Copy Shareable Link

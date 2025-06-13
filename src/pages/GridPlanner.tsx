@@ -93,9 +93,12 @@ export default function GridPlanner() {
   );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<SavedBuildPlan | null>(null);
 
   const saveDialogRef = useRef<HTMLDivElement>(null);
   const loadDialogRef = useRef<HTMLDivElement>(null);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showSaveDialog && saveDialogRef.current) {
@@ -120,6 +123,18 @@ export default function GridPlanner() {
       }, 150);
     }
   }, [showLoadDialog]);
+
+  useEffect(() => {
+    if (showDeleteDialog && deleteDialogRef.current) {
+      setTimeout(() => {
+        deleteDialogRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }, 150);
+    }
+  }, [showDeleteDialog]);
 
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor, {
@@ -319,6 +334,12 @@ export default function GridPlanner() {
     toast.success(`Build plan "${buildPlan.name}" saved successfully!`);
   };
 
+  const handleSaveAttemptEmpty = () => {
+    toast.error(
+      "Build your kingdom first! Place some cards on the grid before saving."
+    );
+  };
+
   const handleLoadBuildPlan = (plan: SavedBuildPlan) => {
     setGridLayout(plan.gridLayout);
     setShowLoadDialog(false);
@@ -342,6 +363,20 @@ export default function GridPlanner() {
     localStorage.setItem("buildPlans", JSON.stringify(updatedPlans));
   };
 
+  const handleConfirmDelete = () => {
+    if (planToDelete) {
+      handleDeleteBuildPlan(planToDelete.id);
+      toast.success(`Build plan "${planToDelete.name}" deleted successfully!`);
+      setShowDeleteDialog(false);
+      setPlanToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+    setPlanToDelete(null);
+  };
+
   const handleCopyToClipboard = async () => {
     try {
       const encodedBuild = encodeBuildForURL(gridLayout, "Shared Build Plan");
@@ -355,6 +390,12 @@ export default function GridPlanner() {
       console.error("Failed to copy to clipboard:", error);
       toast.error("Failed to copy link to clipboard. Please try again.");
     }
+  };
+
+  const handleCopyAttemptEmpty = () => {
+    toast.error(
+      "Build your kingdom first! Place some cards on the grid before sharing."
+    );
   };
 
   const placedCardsCount = Object.values(gridLayout.plots).filter(
@@ -442,6 +483,8 @@ export default function GridPlanner() {
           onShowSaveDialog={() => setShowSaveDialog(true)}
           onShowLoadDialog={() => setShowLoadDialog(true)}
           onCopyToClipboard={handleCopyToClipboard}
+          onSaveAttemptEmpty={handleSaveAttemptEmpty}
+          onCopyAttemptEmpty={handleCopyAttemptEmpty}
           className="mb-8"
         />
 
@@ -535,9 +578,8 @@ export default function GridPlanner() {
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete build plan "${plan.name}"?`)) {
-                            handleDeleteBuildPlan(plan.id);
-                          }
+                          setPlanToDelete(plan);
+                          setShowDeleteDialog(true);
                         }}
                         className="px-3 py-1 bg-red-600 hover:bg-red-500 text-white rounded border border-red-400 text-sm"
                       >
@@ -548,6 +590,71 @@ export default function GridPlanner() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteDialog && planToDelete && (
+          <div
+            ref={deleteDialogRef}
+            className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
+          >
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="text-lg font-bold text-nothing-300">
+                Confirm Deletion
+              </h4>
+              <button
+                onClick={handleCancelDelete}
+                className="px-3 py-1 bg-stone-600 hover:bg-stone-500 text-white rounded border border-stone-400 text-sm"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-stone-300">
+                Are you sure you want to delete the build plan{" "}
+                <strong className="text-nothing-300">
+                  "{planToDelete.name}"
+                </strong>
+                ?
+              </p>
+
+              <div className="bg-stone-800/50 p-3 rounded border border-stone-600">
+                <div className="text-sm text-stone-400">
+                  Created: {new Date(planToDelete.created).toLocaleDateString()}{" "}
+                  at {new Date(planToDelete.created).toLocaleTimeString()}
+                </div>
+                <div className="text-sm text-stone-400">
+                  Cards:{" "}
+                  {
+                    Object.values(planToDelete.gridLayout.plots).filter(
+                      (plot) => plot.cardId
+                    ).length
+                  }{" "}
+                  placed
+                </div>
+              </div>
+
+              <p className="text-sm text-red-400">
+                <strong>This action cannot be undone.</strong>
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded border border-red-400 font-bold"
+                >
+                  Delete Build Plan
+                </button>
+                <button
+                  onClick={handleCancelDelete}
+                  className="px-4 py-2 bg-stone-600 hover:bg-stone-500 text-white rounded border border-stone-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
