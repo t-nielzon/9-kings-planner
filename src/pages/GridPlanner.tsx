@@ -9,6 +9,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import toast from "react-hot-toast";
 import KingdomGrid from "@/components/KingdomGrid";
 import { GridLayout, Card } from "@/types";
 import { kingColors } from "@/data/allCards";
@@ -67,35 +68,48 @@ export default function GridPlanner() {
   );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importText, setImportText] = useState("");
 
-  // refs for dialog scroll behavior
   const saveDialogRef = useRef<HTMLDivElement>(null);
   const loadDialogRef = useRef<HTMLDivElement>(null);
+  const importDialogRef = useRef<HTMLDivElement>(null);
 
-  // scroll to dialog when opened
   useEffect(() => {
     if (showSaveDialog && saveDialogRef.current) {
-      // small delay to ensure the dialog is rendered
       setTimeout(() => {
         saveDialogRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "center",
+          inline: "nearest",
         });
-      }, 100);
+      }, 150);
     }
   }, [showSaveDialog]);
 
   useEffect(() => {
     if (showLoadDialog && loadDialogRef.current) {
-      // small delay to ensure the dialog is rendered
       setTimeout(() => {
         loadDialogRef.current?.scrollIntoView({
           behavior: "smooth",
           block: "center",
+          inline: "nearest",
         });
-      }, 100);
+      }, 150);
     }
   }, [showLoadDialog]);
+
+  useEffect(() => {
+    if (showImportDialog && importDialogRef.current) {
+      setTimeout(() => {
+        importDialogRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }, 150);
+    }
+  }, [showImportDialog]);
 
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor, {
@@ -246,7 +260,7 @@ export default function GridPlanner() {
 
   const handleSaveBuildPlan = () => {
     if (!buildPlanName.trim()) {
-      alert("Please enter a name for your build plan");
+      toast.error("Please enter a name for your build plan");
       return;
     }
 
@@ -263,19 +277,94 @@ export default function GridPlanner() {
 
     setBuildPlanName("");
     setShowSaveDialog(false);
-    alert(`Build plan "${buildPlan.name}" saved successfully!`);
+    toast.success(`Build plan "${buildPlan.name}" saved successfully!`);
   };
 
   const handleLoadBuildPlan = (plan: SavedBuildPlan) => {
     setGridLayout(plan.gridLayout);
     setShowLoadDialog(false);
-    alert(`Build plan "${plan.name}" loaded successfully!`);
+
+    setTimeout(() => {
+      document.querySelector("h1")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+
+      setTimeout(() => {
+        toast.success(`Build plan "${plan.name}" loaded successfully!`);
+      }, 500);
+    }, 200);
   };
 
   const handleDeleteBuildPlan = (planId: string) => {
     const updatedPlans = savedBuildPlans.filter((plan) => plan.id !== planId);
     setSavedBuildPlans(updatedPlans);
     localStorage.setItem("buildPlans", JSON.stringify(updatedPlans));
+  };
+
+  const handleCopyToClipboard = async () => {
+    try {
+      const buildPlanData = {
+        version: "1.0",
+        name: "Shared Build Plan",
+        gridLayout,
+        exported: new Date().toISOString(),
+        cardsCount: Object.values(gridLayout.plots).filter(
+          (plot) => plot.cardId
+        ).length,
+        unlockedPlotsCount: gridLayout.unlockedPlots.length,
+      };
+
+      const jsonString = JSON.stringify(buildPlanData, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      toast.success(
+        "Build plan copied to clipboard! You can now share it with others."
+      );
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      toast.error("Failed to copy to clipboard. Please try again.");
+    }
+  };
+
+  const handleImportFromClipboard = () => {
+    if (!importText.trim()) {
+      toast.error("Please paste your build plan data in the text area");
+      return;
+    }
+
+    try {
+      const importedData = JSON.parse(importText.trim());
+
+      if (!importedData.gridLayout || !importedData.gridLayout.plots) {
+        throw new Error("Invalid build plan format");
+      }
+
+      setGridLayout(importedData.gridLayout);
+      setImportText("");
+      setShowImportDialog(false);
+
+      setTimeout(() => {
+        document.querySelector("h1")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+        });
+
+        setTimeout(() => {
+          toast.success(
+            `Build plan "${
+              importedData.name || "Imported Plan"
+            }" loaded successfully!`
+          );
+        }, 500);
+      }, 200);
+    } catch (error) {
+      console.error("Failed to import build plan:", error);
+      toast.error(
+        "Failed to import build plan. Please check the format and try again."
+      );
+    }
   };
 
   const placedCardsCount = Object.values(gridLayout.plots).filter(
@@ -343,6 +432,14 @@ export default function GridPlanner() {
                   • <strong>Filter</strong> cards by king or type using the
                   dropdowns below
                 </li>
+                <li>
+                  • <strong>Copy to Clipboard</strong> to share your build plan
+                  with others
+                </li>
+                <li>
+                  • <strong>Import from Clipboard</strong> to load shared build
+                  plans
+                </li>
               </ul>
             </div>
           </div>
@@ -358,14 +455,16 @@ export default function GridPlanner() {
           onClearGrid={handleClearGrid}
           onShowSaveDialog={() => setShowSaveDialog(true)}
           onShowLoadDialog={() => setShowLoadDialog(true)}
+          onCopyToClipboard={handleCopyToClipboard}
+          onShowImportDialog={() => setShowImportDialog(true)}
           className="mb-8"
         />
 
         {/* Save Dialog */}
         {showSaveDialog && (
           <div
-            ref={saveDialogRef}
             className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
+            ref={saveDialogRef}
           >
             <h4 className="text-lg font-bold text-nothing-300 mb-3">
               Save Build Plan
@@ -381,7 +480,6 @@ export default function GridPlanner() {
                   if (e.key === "Enter") handleSaveBuildPlan();
                   if (e.key === "Escape") setShowSaveDialog(false);
                 }}
-                autoFocus
               />
               <button
                 onClick={handleSaveBuildPlan}
@@ -401,8 +499,8 @@ export default function GridPlanner() {
 
         {showLoadDialog && (
           <div
-            ref={loadDialogRef}
             className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
+            ref={loadDialogRef}
           >
             <div className="flex justify-between items-center mb-3">
               <h4 className="text-lg font-bold text-nothing-300">
@@ -465,6 +563,58 @@ export default function GridPlanner() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {showImportDialog && (
+          <div
+            className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
+            ref={importDialogRef}
+          >
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="text-lg font-bold text-nothing-300">
+                Import Build Plan from Clipboard
+              </h4>
+              <button
+                onClick={() => {
+                  setShowImportDialog(false);
+                  setImportText("");
+                }}
+                className="px-3 py-1 bg-stone-600 hover:bg-stone-500 text-white rounded border border-stone-400 text-sm"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-sm text-stone-400">
+                Paste your build plan data below (JSON format):
+              </p>
+              <textarea
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                placeholder="Paste build plan JSON here..."
+                className="w-full h-32 px-3 py-2 bg-stone-700 border border-stone-600 rounded text-stone-200 focus:border-nothing-400 focus:outline-none resize-vertical font-mono text-sm"
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={handleImportFromClipboard}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded border border-orange-400 font-bold"
+                  disabled={!importText.trim()}
+                >
+                  Import Build Plan
+                </button>
+                <button
+                  onClick={() => {
+                    setShowImportDialog(false);
+                    setImportText("");
+                  }}
+                  className="px-4 py-2 bg-stone-600 hover:bg-stone-500 text-white rounded border border-stone-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -15,6 +15,8 @@ interface KingdomGridProps {
   onClearGrid: () => void;
   onShowSaveDialog: () => void;
   onShowLoadDialog: () => void;
+  onCopyToClipboard: () => void;
+  onShowImportDialog: () => void;
   className?: string;
 }
 
@@ -287,6 +289,8 @@ export default function KingdomGrid({
   onClearGrid,
   onShowSaveDialog,
   onShowLoadDialog,
+  onCopyToClipboard,
+  onShowImportDialog,
   className,
 }: KingdomGridProps) {
   const generateGridPositions = (size: number): string[] => {
@@ -350,11 +354,13 @@ export default function KingdomGrid({
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4 sm:mt-6">
-            <div className="bg-stone-900/80 px-3 sm:px-4 py-2 rounded-lg border border-stone-600">
-              <span className="text-nothing-300 text-xs sm:text-sm font-bold">
-                Click on dotted plots to expand
-              </span>
-            </div>
+            {hasLockedPlots && (
+              <div className="bg-stone-900/80 px-3 sm:px-4 py-2 rounded-lg border border-stone-600">
+                <span className="text-nothing-300 text-xs sm:text-sm font-bold">
+                  Click on dotted plots to expand
+                </span>
+              </div>
+            )}
             {hasLockedPlots && (
               <>
                 <span className="text-stone-500 text-xs sm:text-sm hidden sm:inline">
@@ -393,6 +399,23 @@ export default function KingdomGrid({
               disabled={savedBuildPlansCount === 0}
             >
               📂 Load Build Plan ({savedBuildPlansCount})
+            </button>
+
+            <button
+              className="btn-primary bg-purple-600 hover:bg-purple-500 border-purple-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
+              onClick={onCopyToClipboard}
+              disabled={placedCardsCount === 0}
+              title="Copy build plan to clipboard for sharing"
+            >
+              📋 Copy to Clipboard
+            </button>
+
+            <button
+              className="btn-primary bg-orange-600 hover:bg-orange-500 border-orange-400 text-xs sm:text-sm px-3 sm:px-4 py-2"
+              onClick={onShowImportDialog}
+              title="Import build plan from clipboard"
+            >
+              📥 Import from Clipboard
             </button>
           </div>
         </div>
