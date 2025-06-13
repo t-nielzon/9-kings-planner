@@ -22,6 +22,31 @@ interface SavedBuildPlan {
   created: Date;
 }
 
+// helper functions for URL-based sharing
+const encodeBuildForURL = (
+  gridLayout: GridLayout,
+  name: string = "Shared Build Plan"
+): string => {
+  const buildData = {
+    version: "1.0",
+    name,
+    gridLayout,
+    exported: new Date().toISOString(),
+  };
+  const jsonString = JSON.stringify(buildData);
+  return btoa(encodeURIComponent(jsonString));
+};
+
+const decodeBuildFromURL = (encodedData: string) => {
+  try {
+    const jsonString = decodeURIComponent(atob(encodedData));
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error("Failed to decode build data from URL:", error);
+    return null;
+  }
+};
+
 function DragOverlayCard({ card }: { card: Card }) {
   const kingColor =
     kingColors[card.kingId as keyof typeof kingColors] || "stone";
@@ -68,12 +93,9 @@ export default function GridPlanner() {
   );
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
-  const [showImportDialog, setShowImportDialog] = useState(false);
-  const [importText, setImportText] = useState("");
 
   const saveDialogRef = useRef<HTMLDivElement>(null);
   const loadDialogRef = useRef<HTMLDivElement>(null);
-  const importDialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (showSaveDialog && saveDialogRef.current) {
@@ -99,18 +121,6 @@ export default function GridPlanner() {
     }
   }, [showLoadDialog]);
 
-  useEffect(() => {
-    if (showImportDialog && importDialogRef.current) {
-      setTimeout(() => {
-        importDialogRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-          inline: "nearest",
-        });
-      }, 150);
-    }
-  }, [showImportDialog]);
-
   const mouseSensor = useSensor(MouseSensor);
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
@@ -120,6 +130,35 @@ export default function GridPlanner() {
   });
 
   const sensors = useSensors(mouseSensor, touchSensor);
+
+  // check for shared build in URL query params on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const buildParam = urlParams.get("build");
+
+    if (buildParam) {
+      const decodedBuild = decodeBuildFromURL(buildParam);
+      if (decodedBuild && decodedBuild.gridLayout) {
+        setGridLayout(decodedBuild.gridLayout);
+        toast.success(
+          `Shared build plan "${
+            decodedBuild.name || "Imported Plan"
+          }" loaded successfully!`
+        );
+
+        // clean up URL by removing the query parameter
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      } else {
+        toast.error(
+          "Invalid build plan in URL. Please check the link and try again."
+        );
+      }
+    }
+  }, []);
 
   const [gridLayout, setGridLayout] = useState<GridLayout>(() => {
     const initialGrid: GridLayout = {
@@ -305,65 +344,16 @@ export default function GridPlanner() {
 
   const handleCopyToClipboard = async () => {
     try {
-      const buildPlanData = {
-        version: "1.0",
-        name: "Shared Build Plan",
-        gridLayout,
-        exported: new Date().toISOString(),
-        cardsCount: Object.values(gridLayout.plots).filter(
-          (plot) => plot.cardId
-        ).length,
-        unlockedPlotsCount: gridLayout.unlockedPlots.length,
-      };
+      const encodedBuild = encodeBuildForURL(gridLayout, "Shared Build Plan");
+      const shareableURL = `${window.location.origin}${window.location.pathname}?build=${encodedBuild}`;
 
-      const jsonString = JSON.stringify(buildPlanData, null, 2);
-      await navigator.clipboard.writeText(jsonString);
+      await navigator.clipboard.writeText(shareableURL);
       toast.success(
-        "Build plan copied to clipboard! You can now share it with others."
+        "Shareable link copied to clipboard! Anyone can click this link to load your build plan."
       );
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
-      toast.error("Failed to copy to clipboard. Please try again.");
-    }
-  };
-
-  const handleImportFromClipboard = () => {
-    if (!importText.trim()) {
-      toast.error("Please paste your build plan data in the text area");
-      return;
-    }
-
-    try {
-      const importedData = JSON.parse(importText.trim());
-
-      if (!importedData.gridLayout || !importedData.gridLayout.plots) {
-        throw new Error("Invalid build plan format");
-      }
-
-      setGridLayout(importedData.gridLayout);
-      setImportText("");
-      setShowImportDialog(false);
-
-      setTimeout(() => {
-        document.querySelector("h1")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-          inline: "nearest",
-        });
-
-        setTimeout(() => {
-          toast.success(
-            `Build plan "${
-              importedData.name || "Imported Plan"
-            }" loaded successfully!`
-          );
-        }, 500);
-      }, 200);
-    } catch (error) {
-      console.error("Failed to import build plan:", error);
-      toast.error(
-        "Failed to import build plan. Please check the format and try again."
-      );
+      toast.error("Failed to copy link to clipboard. Please try again.");
     }
   };
 
@@ -433,12 +423,8 @@ export default function GridPlanner() {
                   dropdowns below
                 </li>
                 <li>
-                  • <strong>Copy to Clipboard</strong> to share your build plan
-                  with others
-                </li>
-                <li>
-                  • <strong>Import from Clipboard</strong> to load shared build
-                  plans
+                  • <strong>Copy Shareable Link</strong> to share your build
+                  plan with others
                 </li>
               </ul>
             </div>
@@ -456,7 +442,6 @@ export default function GridPlanner() {
           onShowSaveDialog={() => setShowSaveDialog(true)}
           onShowLoadDialog={() => setShowLoadDialog(true)}
           onCopyToClipboard={handleCopyToClipboard}
-          onShowImportDialog={() => setShowImportDialog(true)}
           className="mb-8"
         />
 
@@ -563,58 +548,6 @@ export default function GridPlanner() {
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {showImportDialog && (
-          <div
-            className="bg-stone-900/90 border border-stone-500 rounded-lg p-4 mb-4"
-            ref={importDialogRef}
-          >
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="text-lg font-bold text-nothing-300">
-                Import Build Plan from Clipboard
-              </h4>
-              <button
-                onClick={() => {
-                  setShowImportDialog(false);
-                  setImportText("");
-                }}
-                className="px-3 py-1 bg-stone-600 hover:bg-stone-500 text-white rounded border border-stone-400 text-sm"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-sm text-stone-400">
-                Paste your build plan data below (JSON format):
-              </p>
-              <textarea
-                value={importText}
-                onChange={(e) => setImportText(e.target.value)}
-                placeholder="Paste build plan JSON here..."
-                className="w-full h-32 px-3 py-2 bg-stone-700 border border-stone-600 rounded text-stone-200 focus:border-nothing-400 focus:outline-none resize-vertical font-mono text-sm"
-              />
-              <div className="flex gap-3">
-                <button
-                  onClick={handleImportFromClipboard}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded border border-orange-400 font-bold"
-                  disabled={!importText.trim()}
-                >
-                  Import Build Plan
-                </button>
-                <button
-                  onClick={() => {
-                    setShowImportDialog(false);
-                    setImportText("");
-                  }}
-                  className="px-4 py-2 bg-stone-600 hover:bg-stone-500 text-white rounded border border-stone-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
           </div>
         )}
       </div>
