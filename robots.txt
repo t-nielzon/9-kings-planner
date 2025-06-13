@@ -1,0 +1,4 @@
+   User-agent: *
+   Allow: /
+   
+   Sitemap: https://9-kings-planner.netlify.app/sitemap.xml
