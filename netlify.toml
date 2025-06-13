@@ -10,7 +10,29 @@
   to = "/index.html"
   status = 200
 
-# Optional: Custom headers for performance
+# Security headers for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # content security policy - prevents xss and unauthorized resource loading
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';"
+    
+    # prevent clickjacking by denying iframe embedding
+    X-Frame-Options = "DENY"
+    
+    # prevent mime type sniffing attacks
+    X-Content-Type-Options = "nosniff"
+    
+    # control referrer information sent to external sites
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # enable xss protection in browsers
+    X-XSS-Protection = "1; mode=block"
+    
+    # prevent loading over http when https is available
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# Performance headers for static assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
