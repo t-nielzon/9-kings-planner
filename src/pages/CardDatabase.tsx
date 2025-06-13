@@ -37,18 +37,18 @@ function CardDisplay({ card, className }: CardDisplayProps) {
   };
 
   const getOverlayPosition = () => {
-    const overlayWidth = 208;
-    const overlayHeight = 240;
+    const maxOverlayWidth = 320;
+    const maxOverlayHeight = 440;
     const margin = 16;
 
     let left = mousePosition.x + margin;
-    let top = mousePosition.y - overlayHeight - margin;
+    let top = mousePosition.y - maxOverlayHeight - margin;
 
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    if (left + overlayWidth > viewportWidth - margin) {
-      left = mousePosition.x - overlayWidth - margin;
+    if (left + maxOverlayWidth > viewportWidth - margin) {
+      left = mousePosition.x - maxOverlayWidth - margin;
     }
 
     if (left < margin) {
@@ -59,17 +59,17 @@ function CardDisplay({ card, className }: CardDisplayProps) {
       top = mousePosition.y + margin;
     }
 
-    if (top + overlayHeight > viewportHeight - margin) {
-      top = viewportHeight - overlayHeight - margin;
+    if (top + maxOverlayHeight > viewportHeight - margin) {
+      top = viewportHeight - maxOverlayHeight - margin;
     }
 
     left = Math.max(
       margin,
-      Math.min(left, viewportWidth - overlayWidth - margin)
+      Math.min(left, viewportWidth - maxOverlayWidth - margin)
     );
     top = Math.max(
       margin,
-      Math.min(top, viewportHeight - overlayHeight - margin)
+      Math.min(top, viewportHeight - maxOverlayHeight - margin)
     );
 
     return { left, top };
@@ -155,7 +155,7 @@ function CardDisplay({ card, className }: CardDisplayProps) {
             <img
               src={card.assetPath}
               alt={card.name}
-              className={`w-48 h-48 object-cover rounded-lg border-2 border-${kingColor}-400`}
+              className={`max-w-xs max-h-96 w-auto h-auto object-contain rounded-lg border-2 border-${kingColor}-400`}
               onError={(e) => {
                 e.currentTarget.src = "/assets/placeholder-card.jpg";
               }}

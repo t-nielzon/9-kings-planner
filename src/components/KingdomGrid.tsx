@@ -133,14 +133,14 @@ function CardTooltip({ card, isVisible, position }: CardTooltipProps) {
       }}
     >
       <div
-        className={`w-96 p-6 bg-${kingColor}-800/95 border-2 border-${kingColor}-400 rounded-lg shadow-2xl backdrop-blur-sm`}
+        className={`max-w-2xl p-6 bg-${kingColor}-800/95 border-2 border-${kingColor}-400 rounded-lg shadow-2xl backdrop-blur-sm`}
       >
         <div className="flex gap-6">
           <div className="flex-shrink-0">
             <img
               src={card.assetPath}
               alt={card.name}
-              className={`w-32 h-32 object-cover rounded-lg border-2 border-${kingColor}-400`}
+              className={`max-w-xs max-h-96 w-auto h-auto object-contain rounded-lg border-2 border-${kingColor}-400`}
               onError={(e) => {
                 e.currentTarget.src = "/assets/placeholder-card.jpg";
               }}
