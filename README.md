@@ -21,4 +21,4 @@ npm run dev
 
 The code is released under the [MIT License](LICENSE).
 
-9 Kings, its card art and game content belong to their respective owners. This is an unofficial fan project, not affiliated with or endorsed by the game's developer or publisher. Game images in `public/assets/` are not covered by the MIT License.
+9 Kings, its card art and game content belong to their respective owners. This is an unofficial fan project, not affiliated with or endorsed by the game's developer or publisher. Game images in `public/assets/` are not covered by the MIT License; see [NOTICE](NOTICE).
